@@ -83,7 +83,7 @@ async def add_product(
         )
 
 
-@router.get('/getproducts', response_model=list[Product])
+@router.get('/products', response_model=list[Product])
 async def get_products(
     session: AsyncSession = Depends(get_async_session)
 ) -> list[Product]:
@@ -93,7 +93,7 @@ async def get_products(
 
 
 @router.get(
-    '/getproduct/{product_id}',
+    '/product/{product_id}',
     response_model=Product,
     responses={
         400: {
@@ -119,7 +119,7 @@ async def get_product_by_id(
     return value
 
 
-@router.delete('/deleteproduct/{product_id}', response_model=Product)
+@router.delete('/product/{product_id}', response_model=Product)
 async def delete_product(
     product_id: int,
     session: AsyncSession = Depends(get_async_session)
