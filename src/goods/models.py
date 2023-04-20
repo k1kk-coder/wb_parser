@@ -1,5 +1,7 @@
-from sqlalchemy import String, Integer, Table, Column, Numeric, MetaData
+from datetime import datetime
 
+from sqlalchemy import (Column, DateTime, Integer, MetaData, Numeric, String,
+                        Table)
 
 metadata: MetaData = MetaData()
 
@@ -18,5 +20,6 @@ product: Table = Table(
     Column('sale_price', Numeric, nullable=False),
     Column('rating', Integer, nullable=False),
     Column('feedbacks', Integer, nullable=False),
-    Column('colors', String, nullable=True)
+    Column('colors', String, nullable=True),
+    Column('last_upd', DateTime, default=datetime.now)
 )

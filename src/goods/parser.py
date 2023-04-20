@@ -6,17 +6,20 @@ url: str = ('https://card.wb.ru/cards/detail?curr=rub&dest=-1257786&'
             '1,66,48,110,31,22,71,114&spp=0&nm=')
 
 
-async def parse_data(id: int) -> dict:
+async def parse_data(id: int) -> dict | str:
     '''Main func for parse data from wb'''
-    response = requests.get(f"{url}{id}").json()
-    result: dict = {}
-    list_of_fields: list = [
-        'id', 'name', 'brand', 'brandId', 'siteBrandId', 'supplierId',
-        'sale', 'priceU', 'salePriceU', 'rating', 'feedbacks', 'colors']
-    for field in list_of_fields:
-        data = response.get('data').get('products')[0].get(field)
-        if field == 'priceU' or field == 'salePriceU':
-            result[field] = data // 100
-        else:
-            result[field] = data
-    return result
+    try:
+        response = requests.get(f"{url}{id}").json()
+        result: dict = {}
+        list_of_fields: list = [
+            'id', 'name', 'brand', 'brandId', 'siteBrandId', 'supplierId',
+            'sale', 'priceU', 'salePriceU', 'rating', 'feedbacks', 'colors']
+        for field in list_of_fields:
+            data = response.get('data').get('products')[0].get(field)
+            if field == 'priceU' or field == 'salePriceU':
+                result[field] = data // 100
+            else:
+                result[field] = data
+        return result
+    except IndexError:
+        return 'INVALID_PRODUCT_ID'

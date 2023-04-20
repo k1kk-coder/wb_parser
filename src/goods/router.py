@@ -1,13 +1,14 @@
 from database import get_async_session
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.responses import JSONResponse, Response
-from sqlalchemy import select, delete, insert
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import delete, insert, select
 from sqlalchemy.exc import IntegrityError
-from .schemas import RequestIdSchema, Product, example_200_response
-from goods.models import product
-from .parser import parse_data
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from goods.models import product
+
+from .parser import parse_data
+from .schemas import Product, RequestIdSchema, example_200_response
 
 router: APIRouter = APIRouter(
     tags=['goods']
@@ -26,11 +27,20 @@ router: APIRouter = APIRouter(
             }
         },
         400: {
-            "description": "Bad Request",
-            "content": {
-                "application/json": {
-                    "example": {
-                        "detail": "THIS_PRODUCT_IS_ALREADY_IN_THE_DATABASE"}
+            'description': 'Bad Request',
+            'content': {
+                'application/json': {
+                    'example': {
+                        'detail': 'THIS_PRODUCT_IS_ALREADY_IN_THE_DATABASE'}
+                }
+            }
+        },
+        403: {
+            'description': 'Forbidden',
+            'content': {
+                'application/json': {
+                    'example': {
+                        'detail': 'INVALID_PRODUCT_ID'}
                 }
             }
         }
@@ -39,48 +49,55 @@ async def add_product(
     entity: RequestIdSchema,
     session: AsyncSession = Depends(get_async_session)
 ) -> Response:
-    try:
-        data = await parse_data(entity.product_id)
-        colors = None if not data['colors'] else ', '.join(
-            [s.get('name') for s in data['colors']])
-        stmt = insert(product).values(
-            nm_id=data['id'],
-            name=data['name'],
-            brand=data['brand'],
-            brand_id=data['brandId'],
-            site_brand_id=data['siteBrandId'],
-            supplier_id=data['supplierId'],
-            sale=data['sale'],
-            price=data['priceU'],
-            sale_price=data['salePriceU'],
-            rating=data['rating'],
-            feedbacks=data['feedbacks'],
-            colors=colors
+    data = await parse_data(entity.product_id)
+    if data == 'INVALID_PRODUCT_ID':
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail='INVALID_PRODUCT_ID'
         )
-        await session.execute(stmt)
-        await session.commit()
-        return JSONResponse(
-            status_code=status.HTTP_200_OK,
-            content={
-                'nm_id': data['id'],
-                'name': data['name'],
-                'brand': data['brand'],
-                'brand_id': data['brandId'],
-                'site_brand_id': data['siteBrandId'],
-                'supplier_id': data['supplierId'],
-                'sale': data['sale'],
-                'price': data['priceU'],
-                'sale_price': data['salePriceU'],
-                'rating': data['rating'],
-                'feedbacks': data['feedbacks'],
-                'colors': colors
-            }
-        )
-    except IntegrityError:
-        return JSONResponse(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            content={'detail': 'THIS_PRODUCT_IS_ALREADY_IN_THE_DATABASE'}
-        )
+    else:
+        try:
+            data = await parse_data(entity.product_id)
+            colors = None if not data['colors'] else ', '.join(
+                [s.get('name') for s in data['colors']])
+            stmt = insert(product).values(
+                nm_id=data['id'],
+                name=data['name'],
+                brand=data['brand'],
+                brand_id=data['brandId'],
+                site_brand_id=data['siteBrandId'],
+                supplier_id=data['supplierId'],
+                sale=data['sale'],
+                price=data['priceU'],
+                sale_price=data['salePriceU'],
+                rating=data['rating'],
+                feedbacks=data['feedbacks'],
+                colors=colors
+            )
+            await session.execute(stmt)
+            await session.commit()
+            return JSONResponse(
+                status_code=status.HTTP_200_OK,
+                content={
+                    'nm_id': data['id'],
+                    'name': data['name'],
+                    'brand': data['brand'],
+                    'brand_id': data['brandId'],
+                    'site_brand_id': data['siteBrandId'],
+                    'supplier_id': data['supplierId'],
+                    'sale': data['sale'],
+                    'price': data['priceU'],
+                    'sale_price': data['salePriceU'],
+                    'rating': data['rating'],
+                    'feedbacks': data['feedbacks'],
+                    'colors': colors
+                }
+            )
+        except IntegrityError:
+            return JSONResponse(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                content={'detail': 'THIS_PRODUCT_IS_ALREADY_IN_THE_DATABASE'}
+            )
 
 
 @router.get('/products', response_model=list[Product])
