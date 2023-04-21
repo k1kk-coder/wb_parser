@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime, timedelta
 
 from celery import Celery
+from config import redis_host
 from database import async_session_maker
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
@@ -9,10 +10,14 @@ from sqlalchemy.exc import IntegrityError
 from .models import product
 from .parser import parse_data
 
-celery = Celery('tasks', broker='redis://localhost:6379')
+celery = Celery(
+    'tasks',
+    broker=f'redis://{redis_host}:6379',
+    backend=f'redis://{redis_host}:6379'
+    )
 
 
-async def update_product_data(event_loop) -> None:
+async def update_product_data() -> None:
     async with async_session_maker() as session:
         try:
             query = select(product)
@@ -41,15 +46,13 @@ async def update_product_data(event_loop) -> None:
             await session.commit()
         except IntegrityError:
             await session.rollback()
-    await event_loop.create_future()
 
 
 @celery.task
 def update_product_data_task():
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(update_product_data(loop))
-    loop.close()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(update_product_data())
+    return 'success'
 
 
 """Information update every 12 hours"""

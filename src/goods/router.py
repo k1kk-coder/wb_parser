@@ -16,7 +16,7 @@ router: APIRouter = APIRouter(
 
 
 @router.post(
-    '/addproduct',
+    '/product',
     responses={
         200: {
             'description': 'Successful Response',
@@ -136,7 +136,20 @@ async def get_product_by_id(
     return value
 
 
-@router.delete('/product/{product_id}', response_model=Product)
+@router.delete(
+    '/product/{product_id}',
+    response_model=Product,
+    responses={
+        400: {
+            "description": "Bad Request",
+            "content": {
+                "application/json": {
+                    "example": {
+                        "detail": "PRODUCT_WITH_THIS_ID_WAS_NOT_FOUND"}
+                }
+            }
+        }
+    })
 async def delete_product(
     product_id: int,
     session: AsyncSession = Depends(get_async_session)

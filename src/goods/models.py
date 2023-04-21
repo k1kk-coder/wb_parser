@@ -1,7 +1,7 @@
 from datetime import datetime
 
-from sqlalchemy import (Column, DateTime, Integer, MetaData, Numeric, String,
-                        Table)
+from sqlalchemy import (BIGINT, Column, DateTime, Integer, MetaData, Numeric,
+                        String, Table)
 
 metadata: MetaData = MetaData()
 
@@ -9,7 +9,7 @@ metadata: MetaData = MetaData()
 product: Table = Table(
     'product',
     metadata,
-    Column('nm_id', Integer, nullable=False, primary_key=True),
+    Column('nm_id', BIGINT, nullable=False, primary_key=True),
     Column('name', String, nullable=False),
     Column('brand', String, nullable=False),
     Column('brand_id', Integer, nullable=False),
