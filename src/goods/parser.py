@@ -2,7 +2,7 @@ import requests
 from random import choice
 
 
-desktop_agents = [
+desktop_agents: list[str] = [
     'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 '
     '(KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36',
     'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 '
@@ -14,7 +14,7 @@ desktop_agents = [
     ]
 
 
-def random_headers():
+def random_headers() -> dict[str, str]:
     return {
         'User-Agent': choice(desktop_agents),
         'Accept': ('text/html,application/xhtml+xml,application/xml;q=0.9,'
