@@ -2,10 +2,11 @@ import asyncio
 from datetime import datetime, timedelta
 
 from celery import Celery
-from config import redis_host
-from database import async_session_maker
 from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
+
+from config import redis_host
+from database import async_session_maker
 
 from .models import product
 from .parser import parse_data
@@ -14,7 +15,7 @@ celery = Celery(
     'tasks',
     broker=f'redis://{redis_host}:6379',
     backend=f'redis://{redis_host}:6379'
-    )
+)
 
 
 async def update_product_data() -> None:
@@ -27,8 +28,8 @@ async def update_product_data() -> None:
                 data = await parse_data(p.nm_id)
                 colors = None if not data['colors'] else ', '.join(
                     [s.get('name') for s in data['colors']])
-                stmt = update(product).where(product.c.nm_id == p.nm_id).\
-                    values(
+                stmt = update(product).where(
+                    product.c.nm_id == p.nm_id).values(
                     name=data['name'],
                     brand=data['brand'],
                     brand_id=data['brandId'],
