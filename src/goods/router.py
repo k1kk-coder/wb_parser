@@ -19,6 +19,7 @@ router: APIRouter = APIRouter(
 
 @router.post(
     '/product',
+    response_model=Product,
     responses={
         200: successful_response_200,
         400: forbidden_response_400,
