@@ -24,16 +24,7 @@ REDIS_HOST=redis
 ```
 - Находясь в папке infra выполните команду:
 ```
-docker-compose up
-```
-- Перейдите в контейнер backend
-```
-docker exec -it CONTAINER_ID bash
-```
-- Находясь в контейнере выполните команды:
-```
-cd ..
-alembic upgrade head
+docker-compose up -d
 ```
 - По адресу localhost:8000/docs откройте документацию
 
